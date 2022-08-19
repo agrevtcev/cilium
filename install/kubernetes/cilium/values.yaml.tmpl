@@ -184,6 +184,9 @@ securityContext:
     - SETGID
     # Allow to execute program that changes UID (e.g. required for package installation)
     - SETUID
+    # Allow to raise process nice values, set real-time scheduling policies,
+    # set CPU affinity, and other operations (e.g. required to run cilium-probe-kernel-hz)
+    - SYS_NICE
 
 # -- Cilium agent update strategy
 updateStrategy:
