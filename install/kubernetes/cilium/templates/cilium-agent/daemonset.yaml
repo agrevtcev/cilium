@@ -296,6 +296,8 @@ spec:
               - ALL
           {{- end }}
         volumeMounts:
+        - mountPath: /var/run/config-hz
+          name: config-hz
         {{- if not .Values.securityContext.privileged }}
         # Unprivileged containers need to mount /proc/sys/net from the host
         # to have write access
@@ -470,6 +472,20 @@ spec:
               - SYS_CHROOT
               - SYS_PTRACE
           {{- end}}
+      - name: probe-kernel-hz
+        image: {{ include "cilium.image" .Values.image | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - /bin/bash
+        - -c
+        - --
+        args:
+        - /usr/bin/cilium-probe-kernel-hz > /var/run/config-hz/kernel-hz
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /var/run/config-hz
+          name: config-hz
       - name: apply-sysctl-overwrites
         image: {{ include "cilium.image" .Values.image | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -699,6 +715,10 @@ spec:
       {{- end }}
       {{- end }}
       volumes:
+        # To pass probed config-hz
+      - name: config-hz
+        emptyDir:
+          medium: Memory
         # To keep state between restarts / upgrades
       - name: cilium-run
         hostPath:
